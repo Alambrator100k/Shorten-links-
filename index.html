@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>موقع اختصار الروابط والباركود - خدمات متعددة</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6a11cb;
+            --secondary: #2575fc;
+            --success: #4cd964;
+            --info: #5ac8fa;
+            --warning: #ff9500;
+            --danger: #ff3b30;
+            --light: #f8f9fa;
+            --dark: #343a40;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 60%);
+            transform: rotate(30deg);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .description {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .main {
+            padding: 30px;
+        }
+        
+        .service-selection {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+            justify-content: center;
+        }
+        
+        .service-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 15px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .service-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .service-btn.active {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+        }
+        
+        .service-btn i {
+            display: block;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #555;
+            font-size: 1.1rem;
+        }
+        
+        input[type="url"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        input[type="url"]:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.2);
+        }
+        
+        button.action-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin: 10px 0;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        button.action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        button.action-btn:active {
+            transform: translateY(0);
+        }
+        
+        .result {
+            margin-top: 30px;
+            display: none;
+            text-align: center;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            border-left: 5px solid var(--primary);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .short-url {
+            font-size: 18px;
+            color: var(--primary);
+            word-break: break-all;
+            margin: 15px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            border: 1px dashed var(--primary);
+        }
+        
+        #qrcode {
+            margin: 20px auto;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            display: inline-block;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .actions button {
+            min-width: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .copy-btn {
+            background: linear-gradient(135deg, var(--success) 0%, #2ecc71 100%);
+        }
+        
+        .download-btn {
+            background: linear-gradient(135deg, var(--info) 0%, #5ac8fa 100%);
+        }
+        
+        .share-btn {
+            background: linear-gradient(135deg, var(--warning) 0%, #ff9500 100%);
+        }
+        
+        .new-btn {
+            background: linear-gradient(135deg, var(--danger) 0%, #ff3b30 100%);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+            font-size: 0.9rem;
+            background: #f5f5f5;
+            border-top: 1px solid #eee;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 5px solid #2196f3;
+        }
+        
+        .service-info {
+            background: #f0f7ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .main {
+                padding: 20px;
+            }
+            
+            .service-selection {
+                flex-direction: column;
+            }
+            
+            .actions {
+                flex-direction: column;
+            }
+            
+            .actions button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>موقع اختصار الروابط والباركود</h1>
+            <p class="description">اختصِر روابطك باستخدام ثلاث خدمات مجانية مختلفة وأنشئ باركودًا يعمل دائمًا</p>
+        </header>
+        
+        <div class="main">
+            <div class="info-box">
+                <p><i class="fas fa-info-circle"></i> اختر إحدى الخدمات المجانية لاختصار الروابط. الباركود سيعمل بشكل دائم حتى بعد مغادرة الموقع.</p>
+            </div>
+            
+            <div class="service-selection">
+                <div class="service-btn active" data-service="tinyurl">
+                    <i class="fas fa-link"></i>
+                    <span>TinyURL</span>
+                </div>
+                <div class="service-btn" data-service="bitly">
+                    <i class="fas fa-bold"></i>
+                    <span>Bitly</span>
+                </div>
+                <div class="service-btn" data-service="isgd">
+                    <i class="fas fa-compress-alt"></i>
+                    <span>is.gd</span>
+                </div>
+            </div>
+            
+            <div class="service-info" id="tinyurl-info">
+                <h3><i class="fas fa-link"></i> TinyURL</h3>
+                <p>خدمة مجانية لاختصار الروابط بدون الحاجة لتسجيل حساب. الروابط المختصرة تعمل بشكل دائم.</p>
+            </div>
+            
+            <div class="service-info" id="bitly-info">
+                <h3><i class="fas fa-bold"></i> Bitly</h3>
+                <p>أحد أشهر خدمات اختصار الروابط. يتطلب مفتاح API ولكننا نستخدم مفتاحًا عامًا للتجربة.</p>
+            </div>
+            
+            <div class="service-info" id="isgd-info">
+                <h3><i class="fas fa-compress-alt"></i> is.gd</h3>
+                <p>خدمة سريعة وبسيطة لاختصار الروابط بدون إعلانات أو متطلبات تسجيل.</p>
+            </div>
+            
+            <div class="input-group">
+                <label for="long-url"><i class="fas fa-paperclip"></i> أدخل الرابط الطويل:</label>
+                <input type="url" id="long-url" placeholder="https://example.com/very-long-url..." required>
+            </div>
+            
+            <button id="shorten-btn" class="action-btn">
+                <i class="fas fa-magic"></i>
+                <span>اختصِر الرابط وأنشئ الباركود</span>
+            </button>
+            
+            <div class="result" id="result">
+                <h3><i class="fas fa-link"></i> الرابط المختصر:</h3>
+                <p class="short-url" id="short-url"></p>
+                
+                <h3><i class="fas fa-qrcode"></i> الباركود:</h3>
+                <div id="qrcode"></div>
+                <p>يمكنك مسح الباركود بأي تطبيق قارئ باركود وسيعمل!</p>
+                
+                <div class="actions">
+                    <button class="copy-btn" id="copy-btn">
+                        <i class="fas fa-copy"></i>
+                        نسخ الرابط
+                    </button>
+                    <button class="download-btn" id="download-btn">
+                        <i class="fas fa-download"></i>
+                        تحميل الباركود
+                    </button>
+                    <button class="share-btn" id="share-btn">
+                        <i class="fas fa-share-alt"></i>
+                        مشاركة الرابط
+                    </button>
+                    <button class="new-btn" id="new-btn">
+                        <i class="fas fa-plus"></i>
+                        إنشاء جديد
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Alambrator_AS موقع اختصار الروابط والباركود - ثلاث خدمات مجانية. جميع الحقوق محفوظة.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const shortenBtn = document.getElementById('shorten-btn');
+            const longUrlInput = document.getElementById('long-url');
+            const resultDiv = document.getElementById('result');
+            const shortUrlElement = document.getElementById('short-url');
+            const copyBtn = document.getElementById('copy-btn');
+            const downloadBtn = document.getElementById('download-btn');
+            const shareBtn = document.getElementById('share-btn');
+            const newBtn = document.getElementById('new-btn');
+            const serviceButtons = document.querySelectorAll('.service-btn');
+            let qrcode = null;
+            let currentService = 'tinyurl';
+            
+            // تهيئة منشئ الباركود
+            if (!qrcode) {
+                qrcode = new QRCode(document.getElementById('qrcode'), {
+                    width: 200,
+                    height: 200,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+            }
+            
+            // إظهار معلومات الخدمة عند التحديد
+            serviceButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    serviceButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentService = this.dataset.service;
+                    
+                    // إخفاء جميع معلومات الخدمات ثم إظهار المحددة
+                    document.querySelectorAll('.service-info').forEach(info => {
+                        info.style.display = 'none';
+                    });
+                    document.getElementById(`${currentService}-info`).style.display = 'block';
+                });
+            });
+            
+            // إظهار معلومات الخدمة الافتراضية عند التحميل
+            document.getElementById('tinyurl-info').style.display = 'block';
+            
+            // وظيفة اختصار الرابط باستخدام الخدمة المحددة
+            shortenBtn.addEventListener('click', function() {
+                const longUrl = longUrlInput.value.trim();
+                
+                if (!longUrl) {
+                    alert('يرجى إدخال رابط صحيح');
+                    return;
+                }
+                
+                shortenBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري المعالجة...';
+                shortenBtn.disabled = true;
+                
+                let apiUrl;
+                
+                // تحديد خدمة اختصار الروابط بناء على الاختيار
+                if (currentService === 'tinyurl') {
+                    apiUrl = `https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`;
+                    callUrlShortener(apiUrl);
+                } 
+                else if (currentService === 'bitly') {
+                    // نستخدم بروكسي لتجنب مشاكل CORS (لأغراض العرض فقط)
+                    const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+                    apiUrl = `${proxyUrl}https://api-ssl.bitly.com/v3/shorten?access_token=6f4c4f42d2f2bfc7b2d58660f28ac34e0f320c6c&longUrl=${encodeURIComponent(longUrl)}`;
+                    
+                    fetch(apiUrl)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status_code === 200) {
+                                displayShortUrl(data.data.url);
+                            } else {
+                                throw new Error('فشل في اختصار الرابط باستخدام Bitly');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error with Bitly:', error);
+                            alert('عذرًا، حصل خطأ أثناء اختصار الرابط. يرجى المحاولة مرة أخرى أو استخدام خدمة أخرى.');
+                            resetButton();
+                        });
+                }
+                else if (currentService === 'isgd') {
+                    apiUrl = `https://is.gd/create.php?format=json&url=${encodeURIComponent(longUrl)}`;
+                    
+                    fetch(apiUrl)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.shorturl) {
+                                displayShortUrl(data.shorturl);
+                            } else {
+                                throw new Error('فشل في اختصار الرابط باستخدام is.gd');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error with is.gd:', error);
+                            alert('عذرًا، حصل خطأ أثناء اختصار الرابط. يرجى المحاولة مرة أخرى أو استخدام خدمة أخرى.');
+                            resetButton();
+                        });
+                }
+            });
+            
+            // دالة مساعدة لاستدعاء خدمة اختصار الروابط
+            function callUrlShortener(url) {
+                fetch(url)
+                    .then(response => response.text())
+                    .then(shortUrl => {
+                        if (shortUrl.startsWith('http')) {
+                            displayShortUrl(shortUrl);
+                        } else {
+                            throw new Error('فشل في اختصار الرابط');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('عذرًا، حصل خطأ أثناء اختصار الرابط. يرجى المحاولة مرة أخرى أو استخدام خدمة أخرى.');
+                        resetButton();
+                    });
+            }
+            
+            // عرض الرابط المختصر
+            function displayShortUrl(shortUrl) {
+                shortUrlElement.textContent = shortUrl;
+                
+                // إنشاء الباركود
+                qrcode.clear();
+                qrcode.makeCode(shortUrl);
+                
+                // إظهار النتيجة
+                resultDiv.style.display = 'block';
+                
+                // التمرير إلى النتيجة
+                resultDiv.scrollIntoView({ behavior: 'smooth' });
+                
+                resetButton();
+            }
+            
+            // إعادة ضبط الزر
+            function resetButton() {
+                shortenBtn.innerHTML = '<i class="fas fa-magic"></i> اختصِر الرابط وأنشئ الباركود';
+                shortenBtn.disabled = false;
+            }
+            
+            // نسخ الرابط إلى الحافظة
+            copyBtn.addEventListener('click', function() {
+                const shortUrl = shortUrlElement.textContent;
+                
+                navigator.clipboard.writeText(shortUrl).then(() => {
+                    copyBtn.innerHTML = '<i class="fas fa-check"></i> تم النسخ!';
+                    setTimeout(() => {
+                        copyBtn.innerHTML = '<i class="fas fa-copy"></i> نسخ الرابط';
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                    alert('فشل في نسخ الرابط، يرجى المحاولة يدويًا');
+                });
+            });
+            
+            // تحميل الباركود
+            downloadBtn.addEventListener('click', function() {
+                const canvas = document.querySelector('#qrcode canvas');
+                if (!canvas) return;
+                
+                const image = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.href = image;
+                link.download = 'qrcode.png';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                downloadBtn.innerHTML = '<i class="fas fa-check"></i> تم التحميل!';
+                setTimeout(() => {
+                    downloadBtn.innerHTML = '<i class="fas fa-download"></i> تحميل الباركود';
+                }, 2000);
+            });
+            
+            // مشاركة الرابط
+            shareBtn.addEventListener('click', function() {
+                const shortUrl = shortUrlElement.textContent;
+                
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'رابط مختصر',
+                        text: 'تحقق من هذا الرابط المختصر',
+                        url: shortUrl
+                    })
+                    .then(() => console.log('تم المشاركة بنجاح'))
+                    .catch(error => console.log('Error sharing:', error));
+                } else {
+                    alert(`ميزة المشاركة غير مدعومة في متصفحك. يمكنك نسخ الرابط: ${shortUrl}`);
+                }
+            });
+            
+            // إنشاء رابط جديد
+            newBtn.addEventListener('click', function() {
+                longUrlInput.value = '';
+                resultDiv.style.display = 'none';
+                longUrlInput.focus();
+            });
+        });
+    </script>
+</body>
+</html>;
